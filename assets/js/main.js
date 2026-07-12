@@ -382,9 +382,16 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       events: []
     };
 
-    const response = await fetch(window.API_BASE + '/api/events');
-    if(response.ok){
-      state.events = (await response.json()).filter(event => event && event.date);
+    try {
+      const response = await fetch(window.API_BASE + '/api/events');
+      if(response.ok){
+        state.events = (await response.json()).filter(event => event && event.date);
+      }
+    } catch (error) {
+      monthLabel.textContent = 'Unable to load calendar';
+      grid.innerHTML = '<div class="selected-day-empty">Could not reach the events server. Please try again shortly.</div>';
+      selectedDayPanel.innerHTML = '';
+      return;
     }
 
     const formatDateKey = (date) => {

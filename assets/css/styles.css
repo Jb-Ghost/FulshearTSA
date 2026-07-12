@@ -655,7 +655,7 @@ body.header-scrolled .scroll-banner{display:none !important}
   .competition-title{font-size:0.95rem}
   .footer-grid{grid-template-columns:1fr;gap:20px}
   .footer-column{gap:12px}
-  .map-wrap{display:none}
+  .footer-map-column .map-wrap{min-height:220px;height:220px}
   .admin-form input,.event-form input,.event-form textarea{padding:10px 12px;font-size:1rem}
   .event-form textarea{min-height:80px}
   .admin-form button,.event-form button{padding:10px 14px;font-size:0.95rem}
