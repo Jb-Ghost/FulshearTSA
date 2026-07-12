@@ -36,7 +36,7 @@ main{padding:34px 28px 44px;max-width:1180px;margin:0 auto;position:relative;z-i
 main::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 12%,rgba(75,28,90,0.08),transparent 18%),radial-gradient(circle at 82% 22%,rgba(255,255,255,0.45),transparent 16%);filter:blur(0.5px);z-index:0;}
 main > *{position:relative;z-index:1;}
 
-.intro-overlay{position:fixed;inset:0;z-index:99999;display:none;place-items:center;background:linear-gradient(135deg,#2b0f3d 0%,#5b0f7a 45%,#111 100%);color:#fff;overflow:hidden;opacity:0;visibility:hidden;transition:background-color 0.8s ease, opacity 0.4s ease, visibility 0.4s ease;}
+.intro-overlay{position:fixed;inset:0;z-index:99999;display:none;place-items:center;background:linear-gradient(135deg,#2b0f3d 0%,#5b0f7a 45%,#111 100%);color:#fff;overflow:hidden;opacity:0;visibility:hidden;transition:background-color 0.8s ease, opacity var(--intro-fade-duration) var(--intro-fade-ease), visibility var(--intro-fade-duration) var(--intro-fade-ease);}
 .intro-overlay.active{display:grid;opacity:1;visibility:visible;}
 .intro-overlay.reveal .intro-text{opacity:1;transform:translateY(0);} 
 .intro-overlay.reveal .intro-title{opacity:1;transform:translateY(0);} 

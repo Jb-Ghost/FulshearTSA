@@ -975,9 +975,11 @@
       overlay.classList.remove('active');
       overlay.classList.remove('reveal');
       overlay.setAttribute('aria-hidden', 'true');
-      overlay.style.display = 'none';
-      overlay.style.opacity = '0';
-      overlay.style.visibility = 'hidden';
+      // Let the CSS opacity transition play out before hiding it completely,
+      // instead of yanking it away with display:none immediately.
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 650);
     }, 2600);
   };
 
