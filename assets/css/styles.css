@@ -462,10 +462,16 @@ body.header-scrolled .scroll-banner{display:none !important}
 .archive-event-list-section h2{margin-bottom:16px;color:#2b0f3d}
 .archive-event-list{display:grid;gap:10px;padding-left:20px;color:#5b6473}
 .archive-event-list li{background:#f7f2fd;padding:10px 12px;border-radius:12px}
-.gallery-grid-section{padding:32px 0}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px}
-.gallery-card{min-height:180px;border:2px dashed rgba(43,15,61,0.28);border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:rgba(255,255,255,0.88);color:#2b0f3d;font-weight:700;box-shadow:0 10px 30px rgba(43,15,61,0.08)}
-.gallery-card span{display:block;font-size:0.95rem;color:#6b3fa0}
+.gallery-grid-section{padding:32px 0;display:flex;flex-direction:column;gap:24px}
+.gallery-trio{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:16px;height:440px}
+.gallery-duo{display:grid;grid-template-columns:2fr 1fr;gap:16px;height:320px}
+.gallery-photo{display:block;overflow:hidden;border-radius:20px;position:relative;box-shadow:0 14px 34px rgba(43,15,61,0.14)}
+.gallery-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.45s cubic-bezier(0.22,1,0.36,1)}
+.gallery-photo:hover img{transform:scale(1.05)}
+.gallery-photo.big{grid-row:1 / span 2;grid-column:1}
+.gallery-trio .gallery-photo.small:nth-of-type(2){grid-row:1;grid-column:2}
+.gallery-trio .gallery-photo.small:nth-of-type(3){grid-row:2;grid-column:2}
+.gallery-duo .gallery-photo.single{grid-column:2}
 .slides-manager{margin-top:32px;display:grid;gap:24px}
 .slides-add-form{max-width:720px}
 .slides-list{display:grid;gap:18px;margin-top:10px}
@@ -523,12 +529,26 @@ body.header-scrolled .scroll-banner{display:none !important}
   .events-calendar-grid{grid-template-columns:repeat(2,1fr)}
   .competitions-grid{grid-template-columns:1fr}
   .competitions-panel--images-large{display:none}
+
+  /* On mobile, minimizing the header should leave just the logo visible
+     (no nav text), not shrink the logo and keep the nav rows stacked. */
+  .header-container.is-scrolled .site-header{min-height:auto;padding:8px 0;gap:0}
+  .header-container.is-scrolled .main-nav{display:none}
+  .header-container.is-scrolled .logo-section{max-height:none;height:auto;width:auto;margin:0;padding:0;border:0;opacity:1;overflow:visible;pointer-events:auto}
+  .header-container.is-scrolled .logo-link{height:52px;opacity:1;transform:none;cursor:pointer}
+  .header-container.is-scrolled .logo{max-height:52px}
 }
 
 /* Responsive - Medium Tablets (768px and below) */
 @media (max-width:768px){
   html{font-size:16px}
   body{background-size:cover}
+  .gallery-trio{grid-template-columns:1fr;grid-template-rows:auto;height:auto;gap:12px}
+  .gallery-duo{grid-template-columns:1fr;height:auto;gap:12px}
+  .gallery-photo.big{grid-row:auto;grid-column:auto;height:240px}
+  .gallery-trio .gallery-photo.small:nth-of-type(2),
+  .gallery-trio .gallery-photo.small:nth-of-type(3){grid-row:auto;grid-column:auto;height:160px}
+  .gallery-duo .gallery-photo.single{grid-column:auto;height:180px}
   .header-container{padding:20px 16px 28px}
   .site-header{gap:12px;min-height:280px}
   .main-nav{gap:12px;font-size:0.95rem}

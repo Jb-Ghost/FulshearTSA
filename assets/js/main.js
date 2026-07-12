@@ -1,3 +1,9 @@
+// Base URL for the backend API (admin login + events). This is a separate
+// service from GitHub Pages, since GitHub Pages can only serve static files.
+// UPDATE THIS after you deploy server.js somewhere (e.g. Render) —
+// replace with your actual backend URL, no trailing slash.
+window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
+
 // Dropdown menu toggle
 (function(){
   const dropdownBtn = document.querySelector('.dropdown-btn');
@@ -85,6 +91,18 @@
     } else {
       headerContainer.querySelector('.header-video-bg')?.remove();
     }
+  }
+
+  const logoLink = headerContainer?.querySelector('.logo-link');
+  if (logoLink) {
+    logoLink.addEventListener('click', (event) => {
+      const isMobileWidth = window.innerWidth <= 1024;
+      const isMinimized = headerContainer.classList.contains('is-scrolled');
+      if (isMobileWidth && isMinimized) {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
   }
 
   const attachHeaderBehavior = () => {
@@ -218,7 +236,7 @@
       }
 
       try {
-        const response = await fetch('/api/messages', {
+        const response = await fetch(window.API_BASE + '/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -303,7 +321,7 @@
     }
 
     try {
-      const response = await fetch('/api/events');
+      const response = await fetch(window.API_BASE + '/api/events');
       if(!response.ok){
         throw new Error('Unable to load events');
       }
@@ -364,7 +382,7 @@
       events: []
     };
 
-    const response = await fetch('/api/events');
+    const response = await fetch(window.API_BASE + '/api/events');
     if(response.ok){
       state.events = (await response.json()).filter(event => event && event.date);
     }
@@ -532,7 +550,7 @@
     const token = localStorage.getItem('tsaAuthToken');
     if(token){
       try {
-        const response = await fetch('/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(window.API_BASE + '/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
         if(response.ok){
           const data = await parseJsonResponse(response);
           authNotice.textContent = `Signed in as ${data.username}.`;
@@ -562,7 +580,7 @@
       }
       adminStatus.textContent = 'Deleting event...';
       try {
-        const response = await fetch(`/api/events/${encodeURIComponent(eventId)}`, {
+        const response = await fetch(`${window.API_BASE}/api/events/${encodeURIComponent(eventId)}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${localStorage.getItem('tsaAuthToken')}` }
         });
@@ -587,7 +605,7 @@
       };
       adminStatus.textContent = 'Signing in...';
       try {
-        const response = await fetch('/api/admin/login', {
+        const response = await fetch(window.API_BASE + '/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -628,7 +646,7 @@
 
       const editingEventId = eventForm.dataset.editingEventId;
       const method = editingEventId ? 'PUT' : 'POST';
-      const url = editingEventId ? `/api/events/${encodeURIComponent(editingEventId)}` : '/api/events';
+      const url = editingEventId ? `${window.API_BASE}/api/events/${encodeURIComponent(editingEventId)}` : window.API_BASE + '/api/events';
       adminStatus.textContent = editingEventId ? 'Updating event...' : 'Saving event...';
       try {
         const token = localStorage.getItem('tsaAuthToken');
@@ -687,9 +705,6 @@
     renderUpcomingEvents();
     renderHomeCalendar();
     initHomeInteractions();
-    if(document.getElementById('gallery-grid')){
-      initGalleryPlaceholders();
-    }
     if(document.getElementById('archive-login-modal')){
       initArchiveAccess();
     }
@@ -697,22 +712,6 @@
       initSlidesAccess();
     }
   });
-
-  const initGalleryPlaceholders = () => {
-    const grid = document.getElementById('gallery-grid');
-    if(!grid){
-      return;
-    }
-    const items = Array.from({ length: 40 }, (_, index) => `
-      <div class="gallery-card">
-        <div>
-          Photo placeholder
-          <span>Image ${index + 1}</span>
-        </div>
-      </div>
-    `);
-    grid.innerHTML = items.join('');
-  };
 
   const initArchiveAccess = async () => {
     bindPasswordToggle();
@@ -729,7 +728,7 @@
 
     const showContent = async (token) => {
       try {
-        const response = await fetch('/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(window.API_BASE + '/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
         if(!response.ok){
           throw new Error('not-authenticated');
         }
@@ -755,7 +754,7 @@
       event.preventDefault();
       status.textContent = 'Signing in...';
       try {
-        const response = await fetch('/api/admin/login', {
+        const response = await fetch(window.API_BASE + '/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -837,7 +836,7 @@
 
     const showContent = async (token) => {
       try {
-        const response = await fetch('/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(window.API_BASE + '/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
         if(!response.ok){
           throw new Error('not-authenticated');
         }
@@ -865,7 +864,7 @@
       event.preventDefault();
       status.textContent = 'Signing in...';
       try {
-        const response = await fetch('/api/admin/login', {
+        const response = await fetch(window.API_BASE + '/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
