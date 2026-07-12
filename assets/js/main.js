@@ -85,8 +85,35 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         video.poster = 'assets/img/fulshear-logo.png';
         video.setAttribute('aria-hidden', 'true');
         video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('autoplay', '');
+        video.setAttribute('preload', 'auto');
         video.innerHTML = '<source src="assets/video/header-home.mp4" type="video/mp4">';
         headerContainer.prepend(video);
+
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const attemptPlay = () => {
+          if (prefersReducedMotion) {
+            return;
+          }
+          const playPromise = video.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {
+              // Some mobile browsers block the initial autoplay attempt;
+              // retry once the user interacts with the page.
+              const retry = () => {
+                video.play().catch(() => {});
+                document.removeEventListener('touchstart', retry);
+                document.removeEventListener('click', retry);
+              };
+              document.addEventListener('touchstart', retry, { once: true, passive: true });
+              document.addEventListener('click', retry, { once: true });
+            });
+          }
+        };
+        attemptPlay();
       }
     } else {
       headerContainer.querySelector('.header-video-bg')?.remove();
