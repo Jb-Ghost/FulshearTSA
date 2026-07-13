@@ -1032,11 +1032,15 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
     }, 2600);
   };
 
-  // Initialize intro on page load
-  if(document.readyState === 'complete'){
-    initIntroSequence();
+  // Initialize intro as soon as the DOM is ready (matches the timing of
+  // startPageEntry's fade-in above) so the overlay is in place before the
+  // page content becomes visible, instead of waiting for window 'load'
+  // (which waits on images/video and can arrive well after the page has
+  // already faded in, causing a brief flash of the page underneath).
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initIntroSequence, {once:true});
   } else {
-    window.addEventListener('load', initIntroSequence, {once:true});
+    initIntroSequence();
   }
 
   // Delegated fallback: ensure any .password-toggle click triggers the toggle
