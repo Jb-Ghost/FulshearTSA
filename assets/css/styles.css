@@ -221,6 +221,9 @@ a.btn,a.nav-btn,a.footer-donate,a.social-icon,a.dropdown-btn{text-decoration:non
 .faq-section{margin-bottom:0}
 .testimonial-section{padding:48px 0;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(243,236,255,0.96) 100%)}
 .testimonial-inner{max-width:980px;margin:0 auto;padding:38px 28px;background:#fff;border-radius:28px;box-shadow:0 30px 80px rgba(75,28,90,0.08);text-align:center;border:1px solid rgba(75,28,90,0.08)}
+.testimonial-carousel{position:relative;min-height:210px;display:block}
+.testimonial-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 800ms ease;padding:0 8px}
+.testimonial-slide.active{opacity:1}
 .testimonial-inner .eyebrow{margin:0 0 12px;font-size:0.85rem;font-weight:900;letter-spacing:0.34em;text-transform:uppercase;color:#6b3fa0}
 .testimonial-inner h2{margin:0 auto 18px;max-width:860px;font-size:clamp(1.5rem,2.5vw,2.4rem);line-height:1.2;color:#2b0f3d}
 .testimonial-author{margin:0;color:#6c2f96;font-weight:700;font-size:1rem}
@@ -266,6 +269,7 @@ a.btn,a.nav-btn,a.footer-donate,a.social-icon,a.dropdown-btn{text-decoration:non
   .hero-media{display:none}
   .hero-inner{flex-direction:column}
   .carousel{height:180px}
+  .testimonial-carousel{min-height:260px}
   .about-awards-layout{grid-template-columns:1fr}
   .about-awards-carousel{min-height:320px}
   .actions-inner{grid-template-columns:1fr}
@@ -410,6 +414,7 @@ body.header-scrolled .scroll-banner{display:none !important}
     .competitions-list{grid-template-columns:1fr}
   }
 .site-footer{position:relative;overflow:hidden;margin-top:48px;padding:48px 34px;background:linear-gradient(135deg,#2b0f3d 0%,#17071f 100%);color:#f7f2fa;border-top:1px solid rgba(255,255,255,0.12);opacity:0;transform:translateY(12px);will-change:opacity,transform}
+.site-credit{position:absolute;left:12px;bottom:8px;font-size:0.65rem;color:rgba(247,242,250,0.45);letter-spacing:0.02em;pointer-events:none;user-select:none}
 .site-footer::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--spot-x,50%) var(--spot-y,50%), rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.25) 28%, transparent 52%);transition:opacity 0.18s ease}
 .site-footer.is-hovering::before{opacity:1}
 .footer-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr 1.3fr 1.4fr;gap:28px;align-items:stretch;min-height:340px}
@@ -624,6 +629,7 @@ body.header-scrolled .scroll-banner{display:none !important}
   .hero-ctas{flex-direction:column;gap:10px}
   .hero-ctas .btn{width:100%;font-size:0.95rem}
   .carousel{height:140px}
+  .testimonial-carousel{min-height:280px}
   .scroll-banner{padding:6px 0}
   .scroll-text{font-size:12px;letter-spacing:4px}
   .about-intro{max-width:100%}
@@ -687,6 +693,7 @@ body.header-scrolled .scroll-banner{display:none !important}
   .logo-link{height:80px}
   .logo{max-height:80px}
   .carousel{height:120px}
+  .testimonial-carousel{min-height:300px}
   main{padding:16px 24px 24px}
 }
 

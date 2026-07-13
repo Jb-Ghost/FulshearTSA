@@ -89,8 +89,9 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         video.setAttribute('muted', '');
         video.setAttribute('autoplay', '');
         video.setAttribute('preload', 'auto');
-        video.innerHTML = '<source src="assets/video/header-home.mp4" type="video/mp4">';
+        video.src = 'assets/video/header-home.mp4';
         headerContainer.prepend(video);
+        video.load();
 
         const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -363,7 +364,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         return;
       }
 
-      const isAdminSession = Boolean(localStorage.getItem('tsaAuthToken'));
+      const isAdminSession = Boolean(localStorage.getItem('tsaAuthToken_home'));
       container.innerHTML = sortedEvents.map(event => {
         const [year, month, day] = event.date.split('-');
         const date = new Date(Number(year), Number(month) - 1, Number(day));
@@ -472,7 +473,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         return;
       }
 
-      const isAdminSession = Boolean(localStorage.getItem('tsaAuthToken'));
+      const isAdminSession = Boolean(localStorage.getItem('tsaAuthToken_home'));
       selectedDayPanel.innerHTML = matches.map(event => `
         <button type="button" class="selected-day-card ${isAdminSession ? 'event-editable' : ''}" data-event-id="${escapeHtml(event.id || '')}">
           <h3>${escapeHtml(event.title)}</h3>
@@ -581,7 +582,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       }
     };
 
-    const token = localStorage.getItem('tsaAuthToken');
+    const token = localStorage.getItem('tsaAuthToken_home');
     if(token){
       try {
         const response = await fetch(window.API_BASE + '/api/admin/me', { headers: { Authorization: `Bearer ${token}` } });
@@ -596,7 +597,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
           throw new Error('not-authenticated');
         }
       } catch (error) {
-        localStorage.removeItem('tsaAuthToken');
+        localStorage.removeItem('tsaAuthToken_home');
         authNotice.textContent = '';
         adminStatus.textContent = 'Please sign in to manage events.';
       }
@@ -616,7 +617,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       try {
         const response = await fetch(`${window.API_BASE}/api/events/${encodeURIComponent(eventId)}`, {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${localStorage.getItem('tsaAuthToken')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('tsaAuthToken_home')}` }
         });
         const result = await parseJsonResponse(response);
         if(!response.ok || !result.success){
@@ -648,7 +649,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         if(!response.ok || !result.success){
           throw new Error(result.error || 'Unable to sign in');
         }
-        localStorage.setItem('tsaAuthToken', result.token);
+        localStorage.setItem('tsaAuthToken_home', result.token);
         authNotice.textContent = `Signed in as ${result.username}.`;
         eventForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
@@ -683,7 +684,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       const url = editingEventId ? `${window.API_BASE}/api/events/${encodeURIComponent(editingEventId)}` : window.API_BASE + '/api/events';
       adminStatus.textContent = editingEventId ? 'Updating event...' : 'Saving event...';
       try {
-        const token = localStorage.getItem('tsaAuthToken');
+        const token = localStorage.getItem('tsaAuthToken_home');
         const response = await fetch(url, {
           method,
           headers: {
@@ -710,6 +711,21 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
   const initHomeInteractions = () => {
     document.querySelectorAll('.carousel').forEach((carousel) => {
       const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+      if(!slides.length){
+        return;
+      }
+
+      let idx = 0;
+      slides.forEach((slide, index) => slide.classList.toggle('active', index === 0));
+      setInterval(() => {
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+      }, 6000);
+    });
+
+    document.querySelectorAll('.testimonial-carousel').forEach((carousel) => {
+      const slides = Array.from(carousel.querySelectorAll('.testimonial-slide'));
       if(!slides.length){
         return;
       }
@@ -771,7 +787,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         status.textContent = 'Archive access granted.';
         passwordField.value = '';
       } catch (error) {
-        localStorage.removeItem('tsaAuthToken');
+        localStorage.removeItem('tsaAuthToken_archive');
         content.classList.add('hidden');
         overlay.classList.remove('hidden');
         form.classList.remove('hidden');
@@ -779,7 +795,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       }
     };
 
-    const token = localStorage.getItem('tsaAuthToken');
+    const token = localStorage.getItem('tsaAuthToken_archive');
     if(token){
       await showContent(token);
     }
@@ -800,7 +816,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         if(!response.ok || !result.success){
           throw new Error(result.error || 'Unable to sign in');
         }
-        localStorage.setItem('tsaAuthToken', result.token);
+        localStorage.setItem('tsaAuthToken_archive', result.token);
         await showContent(result.token);
         passwordField.value = '';
       } catch (error) {
@@ -881,7 +897,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         status.textContent = 'Slide access granted.';
         passwordField.value = '';
       } catch (error) {
-        localStorage.removeItem('tsaAuthToken');
+        localStorage.removeItem('tsaAuthToken_slides');
         content.classList.add('hidden');
         overlay.classList.remove('hidden');
         form.classList.remove('hidden');
@@ -889,7 +905,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
       }
     };
 
-    const token = localStorage.getItem('tsaAuthToken');
+    const token = localStorage.getItem('tsaAuthToken_slides');
     if(token){
       await showContent(token);
     }
@@ -910,7 +926,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         if(!response.ok || !result.success){
           throw new Error(result.error || 'Unable to sign in');
         }
-        localStorage.setItem('tsaAuthToken', result.token);
+        localStorage.setItem('tsaAuthToken_slides', result.token);
         await showContent(result.token);
         passwordField.value = '';
       } catch (error) {
@@ -1040,6 +1056,16 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         node = node.parentNode;
       }
     } catch (err) { /* ignore */ }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const footer = document.getElementById('site-footer');
+    if (footer && !footer.querySelector('.site-credit')) {
+      const credit = document.createElement('div');
+      credit.className = 'site-credit';
+      credit.textContent = 'by: JBH';
+      footer.appendChild(credit);
+    }
   });
 
 })();
