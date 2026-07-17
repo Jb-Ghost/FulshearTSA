@@ -1020,6 +1020,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
     });
 
     setTimeout(() => {
+      document.body.classList.remove('intro-active');
       document.body.classList.add('intro-complete');
       overlay.classList.remove('active');
       overlay.classList.remove('reveal');
