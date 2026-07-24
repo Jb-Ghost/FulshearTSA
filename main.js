@@ -89,14 +89,8 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         video.setAttribute('muted', '');
         video.setAttribute('autoplay', '');
         video.setAttribute('preload', 'auto');
-        video.setAttribute('disablepictureinpicture', '');
-        video.setAttribute('disableRemotePlayback', '');
-        video.disablePictureInPicture = true;
+        video.innerHTML = '<source src="assets/video/header-home.mp4" type="video/mp4">';
         headerContainer.prepend(video);
-        // Set src last (and directly, not via an injected <source> element) —
-        // this is the most reliable way to get Safari/iOS to recognize and
-        // start loading the video as soon as it's added to the page.
-        video.src = 'assets/video/header-home.mp4';
 
         const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
