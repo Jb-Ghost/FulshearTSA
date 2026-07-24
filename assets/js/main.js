@@ -74,50 +74,52 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
   if(headerContainer){
     headerContainer.classList.toggle('home-page', isHomePage);
 
-    if(isHomePage){
-      if(!headerContainer.querySelector('.header-video-bg')){
-        const video = document.createElement('video');
-        video.className = 'header-video-bg';
-        video.autoplay = true;
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.poster = 'assets/img/fulshear-logo.png';
-        video.setAttribute('aria-hidden', 'true');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        video.setAttribute('muted', '');
-        video.setAttribute('autoplay', '');
-        video.setAttribute('preload', 'auto');
-        video.src = 'assets/video/header-home.mp4';
-        headerContainer.prepend(video);
-        video.load();
+    // The header video (if this page has one) already lives in the HTML,
+    // so it displays even if a script error happens elsewhere on the page.
+    // Here we just make sure it actually starts playing.
+    const video = headerContainer.querySelector('.header-video-bg');
+    if(video){
+      video.muted = true;
+      video.playsInline = true;
 
-        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const attemptPlay = () => {
-          if (prefersReducedMotion) {
-            return;
-          }
-          const playPromise = video.play();
-          if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => {
-              // Some mobile browsers block the initial autoplay attempt;
-              // retry once the user interacts with the page.
-              const retry = () => {
-                video.play().catch(() => {});
-                document.removeEventListener('touchstart', retry);
-                document.removeEventListener('click', retry);
-              };
-              document.addEventListener('touchstart', retry, { once: true, passive: true });
-              document.addEventListener('click', retry, { once: true });
-            });
-          }
-        };
+      const attemptPlay = () => {
+        if (prefersReducedMotion) {
+          return;
+        }
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {
+            // Some mobile browsers (and iOS Low Power Mode) block the
+            // initial autoplay attempt; retry once the user interacts
+            // with the page, and again once the video has real data.
+            const retry = () => {
+              video.play().catch(() => {});
+            };
+            document.addEventListener('touchstart', retry, { once: true, passive: true });
+            document.addEventListener('click', retry, { once: true });
+            video.addEventListener('loadeddata', retry, { once: true });
+            video.addEventListener('canplay', retry, { once: true });
+          });
+        }
+      };
+
+      if (video.readyState >= 2) {
         attemptPlay();
+      } else {
+        video.addEventListener('loadedmetadata', attemptPlay, { once: true });
+        video.load();
       }
-    } else {
-      headerContainer.querySelector('.header-video-bg')?.remove();
+
+      // iOS Safari frequently pauses background video when the app is
+      // backgrounded and doesn't always resume it on its own — so the
+      // video appears "stuck"/broken when the person returns to the tab.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && video.paused && !prefersReducedMotion) {
+          video.play().catch(() => {});
+        }
+      });
     }
   }
 
@@ -259,30 +261,49 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         submittedAt: new Date().toISOString()
       };
 
+      // Save a copy in the background so it still shows up in the officer
+      // "Contact Form Messages" panel. This is fire-and-forget — it never
+      // blocks or delays opening the person's email app below.
+      fetch(window.API_BASE + '/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+
+      const recipient = 'tsacfhs@gmail.com';
+      const subject = `Website contact form — ${payload.name || 'New message'}`;
+      const body = `${payload.message}\n\n— ${payload.name}${payload.email ? ` (${payload.email})` : ''}`;
+      const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
       if(status){
-        status.textContent = 'Sending...';
+        status.textContent = 'Opening your email app to send this...';
       }
 
-      try {
-        const response = await fetch(window.API_BASE + '/api/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+      // Opening a mailto: link hands off to whatever the person has set as
+      // their default mail app (Mail, Gmail, Outlook, etc.) with the
+      // message already filled in, instead of submitting silently.
+      window.location.href = mailtoLink;
 
-        if(!response.ok){
-          throw new Error('Request failed');
-        }
+      form.reset();
+    });
+  }
 
-        form.reset();
-        if(status){
-          status.textContent = 'Thanks! Your message was sent.';
-        }
-      } catch (error) {
-        if(status){
-          status.textContent = 'Sorry, something went wrong. Please try again later.';
-        }
-      }
+  const gmailLink = document.getElementById('footer-gmail-link');
+  if(gmailLink){
+    gmailLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      const nameField = form?.querySelector('input[name="name"]');
+      const emailField = form?.querySelector('input[name="email"]');
+      const messageField = form?.querySelector('textarea[name="message"]');
+      const name = nameField?.value.trim() || '';
+      const email = emailField?.value.trim() || '';
+      const message = messageField?.value.trim() || '';
+      const subject = encodeURIComponent(`Website contact form — ${name || 'New message'}`);
+      const body = encodeURIComponent(`${message}\n\n— ${name}${email ? ` (${email})` : ''}`);
+      // Gmail's own compose URL, so this opens the person's Gmail
+      // specifically (in the app on mobile, or gmail.com on desktop)
+      // rather than whatever the OS default mail handler is.
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=tsacfhs@gmail.com&su=${subject}&body=${body}`, '_blank', 'noopener');
     });
   }
 
