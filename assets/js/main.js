@@ -288,25 +288,6 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
     });
   }
 
-  const gmailLink = document.getElementById('footer-gmail-link');
-  if(gmailLink){
-    gmailLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      const nameField = form?.querySelector('input[name="name"]');
-      const emailField = form?.querySelector('input[name="email"]');
-      const messageField = form?.querySelector('textarea[name="message"]');
-      const name = nameField?.value.trim() || '';
-      const email = emailField?.value.trim() || '';
-      const message = messageField?.value.trim() || '';
-      const subject = encodeURIComponent(`Website contact form — ${name || 'New message'}`);
-      const body = encodeURIComponent(`${message}\n\n— ${name}${email ? ` (${email})` : ''}`);
-      // Gmail's own compose URL, so this opens the person's Gmail
-      // specifically (in the app on mobile, or gmail.com on desktop)
-      // rather than whatever the OS default mail handler is.
-      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=tsacfhs@gmail.com&su=${subject}&body=${body}`, '_blank', 'noopener');
-    });
-  }
-
   const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
     '&': '&amp;',
     '<': '&lt;',
