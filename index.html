@@ -226,6 +226,12 @@
         </form>
         <div class="form-status" id="home-admin-status" aria-live="polite"></div>
         <div class="form-status" id="home-auth-notice" aria-live="polite"></div>
+
+        <div class="messages-panel hidden" id="home-messages-panel">
+          <h3>Contact Form Messages</h3>
+          <p class="messages-panel-hint">Messages sent from the footer contact form. Use "Reply by Gmail" to answer from your own Gmail account.</p>
+          <div class="messages-list" id="home-messages-list"></div>
+        </div>
       </aside>
     </div>
   </section>
@@ -293,6 +299,7 @@
           <button type="submit">Send Message</button>
           <div class="form-status" aria-live="polite"></div>
         </form>
+        <a class="footer-gmail-link" id="footer-gmail-link" href="#" target="_blank" rel="noreferrer">Prefer email? Send from your Gmail instead</a>
       </div>
       <div class="footer-column footer-map-column">
         <div class="footer-title">Our Location</div>
