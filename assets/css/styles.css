@@ -437,8 +437,22 @@ body.header-scrolled .scroll-banner{display:none !important}
 .contact-form button{width:max-content;padding:12px 20px;border:none;border-radius:999px;background:#fff;color:#2b0f3d;font-weight:800;cursor:pointer;font-size:1rem}
 .contact-form button:hover{background:#e8dcf7}
 .form-status{min-height:1.2rem;font-size:0.96rem;color:#d2b7ff}
+.footer-gmail-link{display:inline-flex;align-items:center;gap:6px;color:#e8dcf7;font-size:0.92rem;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.footer-gmail-link:hover{color:#fff}
 .footer-map-column .map-wrap{border-radius:18px;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,0.28);min-height:100%;background:#111}
 .footer-map-column iframe{width:100%;height:100%;border:0;display:block;}
+
+.messages-panel{margin-top:24px;padding-top:20px;border-top:1px solid rgba(43,15,61,0.12)}
+.messages-panel h3{margin:0 0 4px;color:#2b0f3d;font-size:1.05rem}
+.messages-panel-hint{color:#5b6473;font-size:0.9rem;line-height:1.5;margin:0 0 14px}
+.messages-list{display:grid;gap:12px;max-height:420px;overflow-y:auto}
+.message-item{border:1px solid rgba(43,15,61,0.14);border-radius:14px;padding:14px 16px;background:#faf7fd}
+.message-item-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:0.88rem;color:#6b3fa0;font-weight:700;margin-bottom:6px}
+.message-item-date{color:#8b7a9c;font-weight:600}
+.message-item-body{color:#2b0f3d;line-height:1.5;white-space:pre-wrap;margin-bottom:10px}
+.message-item-reply{display:inline-flex;align-items:center;gap:6px;font-size:0.86rem;font-weight:700;color:#6b3fa0;text-decoration:underline;text-underline-offset:3px}
+.message-item-reply:hover{color:#2b0f3d}
+.messages-empty{color:#5b6473;font-size:0.92rem}
 
 @keyframes footerFade{
   0%{opacity:0;transform:translateY(12px)}

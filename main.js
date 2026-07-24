@@ -89,8 +89,14 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         video.setAttribute('muted', '');
         video.setAttribute('autoplay', '');
         video.setAttribute('preload', 'auto');
-        video.innerHTML = '<source src="assets/video/header-home.mp4" type="video/mp4">';
+        video.setAttribute('disablepictureinpicture', '');
+        video.setAttribute('disableRemotePlayback', '');
+        video.disablePictureInPicture = true;
         headerContainer.prepend(video);
+        // Set src last (and directly, not via an injected <source> element) —
+        // this is the most reliable way to get Safari/iOS to recognize and
+        // start loading the video as soon as it's added to the page.
+        video.src = 'assets/video/header-home.mp4';
 
         const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -114,6 +120,16 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
           }
         };
         attemptPlay();
+
+        // iOS Safari frequently pauses background video when the app is
+        // backgrounded or the browser tab loses focus, and won't resume it
+        // on its own — so the video appears "stuck"/broken when the person
+        // comes back. Nudge it to resume whenever the page becomes visible again.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && video.paused && !prefersReducedMotion) {
+            video.play().catch(() => {});
+          }
+        });
       }
     } else {
       headerContainer.querySelector('.header-video-bg')?.remove();
@@ -245,8 +261,43 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
     });
   }
 
+  const OFFICER_EMAIL = 'tsacfhs@gmail.com';
+
+  const buildGmailComposeUrl = ({ name, email, message }) => {
+    const subject = 'Fulshear TSA Website Inquiry';
+    const bodyLines = [
+      message || '',
+      '',
+      `From: ${name || '(no name given)'}`,
+      `Reply-to: ${email || '(no email given)'}`
+    ];
+    const params = new URLSearchParams({
+      view: 'cm',
+      fs: '1',
+      to: OFFICER_EMAIL,
+      su: subject,
+      body: bodyLines.join('\n')
+    });
+    return `https://mail.google.com/mail/?${params.toString()}`;
+  };
+
   const form = document.getElementById('contact-form');
   const status = form?.querySelector('.form-status');
+  const gmailLink = document.getElementById('footer-gmail-link');
+
+  if(gmailLink && form){
+    gmailLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const url = buildGmailComposeUrl({
+        name: formData.get('name')?.toString().trim(),
+        email: formData.get('email')?.toString().trim(),
+        message: formData.get('message')?.toString().trim()
+      });
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+
   if(form){
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -563,10 +614,62 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
     const submitButton = document.getElementById('home-event-submit');
     const cancelButton = document.getElementById('home-event-cancel');
     const deleteButton = document.getElementById('home-event-delete');
+    const messagesPanel = document.getElementById('home-messages-panel');
+    const messagesList = document.getElementById('home-messages-list');
 
     if(!loginForm || !eventForm || !adminStatus){
       return;
     }
+
+    const buildReplyGmailUrl = (msg) => {
+      const params = new URLSearchParams({
+        view: 'cm',
+        fs: '1',
+        to: msg.email || '',
+        su: 'Re: Your message to Fulshear TSA',
+        body: `Hi ${msg.name || ''},\n\n`
+      });
+      return `https://mail.google.com/mail/?${params.toString()}`;
+    };
+
+    const loadMessagesInbox = async () => {
+      if(!messagesPanel || !messagesList){
+        return;
+      }
+      messagesPanel.classList.remove('hidden');
+      messagesList.innerHTML = '<div class="messages-empty">Loading messages...</div>';
+      try {
+        const authToken = localStorage.getItem('tsaAuthToken');
+        const response = await fetch(window.API_BASE + '/api/messages', {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        const data = await parseJsonResponse(response);
+        if(!response.ok){
+          throw new Error(data.error || 'Unable to load messages');
+        }
+        const messages = Array.isArray(data) ? data : [];
+        if(!messages.length){
+          messagesList.innerHTML = '<div class="messages-empty">No messages yet.</div>';
+          return;
+        }
+        const sorted = [...messages].sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+        messagesList.innerHTML = sorted.map((msg) => {
+          const when = msg.submittedAt ? new Date(msg.submittedAt).toLocaleString() : '';
+          return `
+            <div class="message-item">
+              <div class="message-item-meta">
+                <span>${escapeHtml(msg.name || 'Anonymous')} &lt;${escapeHtml(msg.email || 'no email')}&gt;</span>
+                <span class="message-item-date">${escapeHtml(when)}</span>
+              </div>
+              <div class="message-item-body">${escapeHtml(msg.message || '')}</div>
+              ${msg.email ? `<a class="message-item-reply" href="${buildReplyGmailUrl(msg)}" target="_blank" rel="noreferrer">Reply by Gmail</a>` : ''}
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        messagesList.innerHTML = `<div class="messages-empty">${escapeHtml(error.message || 'Unable to load messages.')}</div>`;
+      }
+    };
 
     const resetEventForm = () => {
       eventForm.reset();
@@ -592,6 +695,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
           loginForm.classList.add('hidden');
           adminStatus.textContent = 'Access granted. You can add or update calendar events now.';
           resetEventForm();
+          await loadMessagesInbox();
         } else {
           throw new Error('not-authenticated');
         }
@@ -599,6 +703,7 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         localStorage.removeItem('tsaAuthToken');
         authNotice.textContent = '';
         adminStatus.textContent = 'Please sign in to manage events.';
+        messagesPanel?.classList.add('hidden');
       }
     }
 
@@ -657,11 +762,13 @@ window.API_BASE = 'https://fulshear-tsa-backend.onrender.com';
         resetEventForm();
         await renderHomeCalendar();
         await renderUpcomingEvents();
+        await loadMessagesInbox();
       } catch (error) {
         adminStatus.textContent = error.message || 'Unable to sign in right now.';
         authNotice.textContent = '';
         eventForm.classList.add('hidden');
         loginForm.classList.remove('hidden');
+        messagesPanel?.classList.add('hidden');
       }
     });
 
